@@ -1,79 +1,114 @@
-# 📂 06 - Crear un Spark Pool en Azure Synapse Analytics
+# 📂 07 - Configurar Notebooks en Azure Synapse Analytics
 
 ---
 
 # 🚀 Objetivo
 
-Configurar un **Spark Pool** dentro del Azure Synapse Workspace para ejecutar código **PySpark** en notebooks.
+Aprender a crear, configurar y preparar un **Notebook** en **Azure Synapse Studio** para programar con **PySpark**.
 
 ---
 
-# 📅 Requisitos previos
+# 📚 ¿Qué es un Notebook en Synapse?
 
-- Haber creado un **Azure Synapse Workspace**.
-- Tener acceso al **Synapse Studio** ([https://web.azuresynapse.net/](https://web.azuresynapse.net/)).
+- Un **Notebook** es un documento interactivo que contiene:
+  - Código ejecutable (PySpark, SparkSQL, Scala, C#).
+  - Resultados de ejecución.
+  - Comentarios en Markdown.
+- Permite programar y ver resultados **directamente en la nube**.
 
----
-
-# 🔢 Paso a paso para crear el Spark Pool
-
-## 1. Acceder al Synapse Studio
-
-- Desde el portal de Azure, entra a tu Synapse Workspace.
-- Haz clic en **Abrir Synapse Studio**.
-
-## 2. Ir a "Manage"
-
-- En la parte izquierda, haz clic en el icono de **rueda dentada** llamado **Manage**.
-
-## 3. Crear un nuevo Spark Pool
-
-- Dentro de "Apache Spark Pools", haz clic en **+ New** (Nuevo).
-
-## 4. Configurar el Spark Pool
-
-### Campos importantes a rellenar:
-
-| Campo | Recomendación |
-|:---|:---|
-| **Nombre del pool** | Ejemplo: `sparkpool-demo` |
-| **Node Size** | Small (4 vCores, 32 GB RAM) para pruebas |
-| **Node Size Family** | Memory Optimized |
-| **Autoscale** | Activado (por ejemplo, entre 3 y 5 nodos) |
-| **Auto-pause** | Activado (pausar tras 15 min de inactividad) |
-
-
-## 5. Opciones de Autoscaling
-
-- **Autoscale**: permite ajustar automáticamente el número de nodos según la carga de trabajo.
-- **Auto-pause**: suspende automáticamente el Spark Pool si no hay actividad, ahorrando créditos.
-
-> 📌 Consejo: Activar estas opciones para no gastar recursos innecesariamente.
-
-
-## 6. Crear el Spark Pool
-
-- Revisa la configuración.
-- Haz clic en **Create** (Crear).
+> En Synapse, los Notebooks son la forma más rápida y visual de trabajar con Spark.
 
 ---
 
-# 📊 ¿Cuánto tarda?
+# 🔢 Paso a paso para crear un Notebook
 
-La creación puede tardar entre **2 y 5 minutos**.
+## 1. Entrar a Synapse Studio
+
+- Accede a tu Synapse Workspace.
+- Abre el **Synapse Studio** ([https://web.azuresynapse.net/](https://web.azuresynapse.net/)).
+
+## 2. Crear un nuevo Notebook
+
+- En el menú izquierdo, haz clic en **Develop**.
+- Clic en **+ Notebook**.
+
+## 3. Asignar un Spark Pool al Notebook
+
+- Arriba del Notebook, verás la opción "**Attach to**".
+- Selecciona el Spark Pool que creaste (ej: `sparkpool-demo`).
+
+> 📌 **Importante:** Sin Spark Pool, el Notebook no podrá ejecutar código PySpark.
+
+## 4. Configurar el lenguaje
+
+- En cada celda, puedes elegir el lenguaje:
+  - **PySpark** (Python)
+  - **Spark SQL** (SQL)
+  - **Scala**
+  - **.NET for Apache Spark (C#)**
+
+- Selecciona **PySpark** para programar en Python.
+
+
+## 5. Primeras pruebas en el Notebook
+
+### Crear una sesión
+
+Al escribir tu primer código y darle a "Run", el Spark Pool iniciará una sesión.
+
+Ejemplo de código PySpark para probar:
+
+```python
+# Crear un DataFrame sencillo
+datos = [("Ana", 30), ("Luis", 25), ("Carlos", 35)]
+columnas = ["Nombre", "Edad"]
+
+# Crear DataFrame
+df = spark.createDataFrame(datos, columnas)
+
+# Mostrar los datos
+df.show()
+```
+
+### Resultado esperado:
+
+```
++-------+----+
+| Nombre|Edad|
++-------+----+
+|    Ana|  30|
+|   Luis|  25|
+| Carlos|  35|
++-------+----+
+```
+
+> 🔸 Si ves este resultado, tu Notebook y Spark Pool están funcionando correctamente.
 
 ---
 
-# 📚 Recordatorio importante
+# 📊 Buenas prácticas con Notebooks
 
-Cada Notebook que ejecutes deberá estar **vinculado** a este Spark Pool para poder correr código PySpark.
+- **Pon títulos** claros en cada Notebook.
+- **Divide** tu código en varias celdas pequeñas.
+- **Anota** tus notebooks usando celdas Markdown para explicar procesos.
+- **Detén tu sesión** si no estás trabajando para ahorrar recursos.
+
+
+---
+
+# 🛠️ Opciones adicionales
+
+- Puedes guardar tu Notebook en el almacenamiento del Workspace.
+- Puedes exportarlo como archivo `.ipynb` compatible con Jupyter.
+
 
 ---
 
 # 🌟 Resultado esperado
 
-Tendrás disponible tu **Spark Pool** bajo el nombre que hayas elegido, listo para ejecutar código PySpark.
+- Tienes un Notebook conectado a un Spark Pool listo para trabajar.
+- Has ejecutado tu primer código PySpark en la nube.
 
 ---
 
-# 📂 Siguiente archivo: `07_configurar_notebooks_synapse.md
+# 📂 Siguiente archivo: `08_primer_notebook_synapse.md`
