@@ -1,4 +1,4 @@
-# Análisis de Datos de Taxis Amarillos en NYC (2020–2024)
+# 🚖 Análisis de Datos de Taxis Amarillos en NYC (2020–2024)
 
 ## 📌 Descripción del Proyecto
 
@@ -8,7 +8,6 @@ Este proyecto analiza los datos de los taxis amarillos en Nueva York entre los a
 
 Los datos provienen del portal oficial de taxis de NYC: [NYC Taxi & Limousine Commission](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page)
 
-- Se descargaron manualmente los datasets **Yellow Taxi** correspondientes a los años 2020–2024.
 - Los archivos fueron guardados en **Google Drive** y posteriormente montados en un volumen manual llamado `test_volume` dentro del entorno de Databricks.
 
 ## ⚙️ Proceso ETL (Extract, Transform, Load)
@@ -76,13 +75,75 @@ Estas visualizaciones permiten detectar patrones de demanda y comportamiento del
 - **Python (PySpark)** para el desarrollo del ETL.
 - **Lightdash** para la visualización de datos.
 
-## 🎯 Motivación
+## 🧪 Análisis Exploratorio
 
-El análisis busca responder a preguntas clave sobre la operación de taxis en la ciudad de Nueva York, como:
+Durante el análisis, se realizaron varias agregaciones clave para entender los patrones de comportamiento de los viajes en NYC.
 
-- ¿En qué horarios se concentra la mayor demanda?
-- ¿Cuáles son las franjas más rentables?
-- ¿Cómo evolucionan los patrones de uso a lo largo de los años?
+### 🔹 Horas con mayor número de pasajeros
 
----
+```python
+from pyspark.sql.functions import sum
+
+hour_passengers = df.select("hour", "passenger_count") \
+  .groupBy("hour") \
+  .agg(sum("passenger_count").alias("total_passengers")) \
+  .orderBy("total_passengers", ascending=False)
+
+display(hour_passengers)
+```
+
+### 🔹 Horas con mayor número de pasajeros
+
+En este análisis agrupamos por **hora del día** y sumamos la cantidad total de pasajeros para identificar las **horas pico con mayor demanda**.
+
+```python
+from pyspark.sql.functions import sum
+
+hour_passengers = df.select("hour", "passenger_count") \
+  .groupBy("hour") \
+  .agg(sum("passenger_count").alias("total_passengers")) \
+  .orderBy("total_passengers", ascending=False)
+
+display(hour_passengers)
+```
+![Horas con mayor número de pasajeros 2020-2024](https://github.com/user-attachments/assets/31c0f2dd-ff1a-485f-a153-4b6d9b5bf6e0)
+
+
+### 🔹  Momentos del día con viajes más largos o caros
+
+Aquí calculamos la **distancia media** y la **tarifa media** por hora. Esto nos permite identificar qué horas concentran los **viajes más largos y costosos**.
+
+```python
+from pyspark.sql.functions import avg
+
+df_largos_caros = df.select("hour", "trip_distance", "fare_amount") \
+  .groupBy("hour") \
+  .agg(
+      avg("trip_distance").alias("avg_distance"),
+      avg("fare_amount").alias("avg_fare")
+  ) \
+  .orderBy("avg_distance", ascending=False)
+
+display(df_largos_caros)
+```
+![Tarifa media de cada hora](https://github.com/user-attachments/assets/0f99a173-a9eb-459a-b655-2ea5cc241e05)
+![Distancia media por hora](https://github.com/user-attachments/assets/4ee82f73-edbf-4fd5-bb8b-1191d21b58fa)
+
+
+### 🔹   Franjas horarias que generan más ingresos
+
+Sumamos el **total de ingresos por hora** para detectar en qué momentos del día se genera **mayor rentabilidad para los taxistas**.
+
+
+```python
+from pyspark.sql.functions import sum
+
+df_ingresos = df.select("hour", "fare_amount") \
+  .groupBy("hour") \
+  .agg(sum("fare_amount").alias("total_revenue")) \
+  .orderBy("total_revenue", ascending=False)
+
+display(df_ingresos)
+```
+![Franjas horarias que general más ingresos 2020-2024](https://github.com/user-attachments/assets/834a182a-d72b-4a80-afe5-436b7b9f1755)
 
