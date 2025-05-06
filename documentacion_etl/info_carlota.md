@@ -107,6 +107,10 @@ hour_passengers = df.select("hour", "passenger_count") \
   .orderBy("total_passengers", ascending=False)
 
 display(hour_passengers)
+
+# Guardar como tabla Delta para usar en el dashboard
+hour_passengers.write.format("delta").mode("overwrite").saveAsTable("workspace.default.hourly_passengers")
+
 ```
 
 ### 🔹 Horas con mayor número de pasajeros
