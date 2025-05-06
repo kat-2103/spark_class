@@ -23,6 +23,11 @@ Como solución alternativa:
 - Subieron los archivos a [**Google Drive**](https://drive.google.com/file/d/1KH8jxRvZ9Z5AesszU1ZA0HHiA7RsxaWR/view).
 - Desde allí, los transferí manualmente al volumen montado en Databricks llamado `test_volume`.
 - Finalmente, los leí directamente desde este volumen usando PySpark y los almacené en un **DataFrame** para continuar con el proceso de transformación.
+
+```python
+ruta_volumen = '/Volumes/workspace/default/test_volume/'
+df = spark.read.option('header', 'true').csv(ruta_volumen)
+```
 ### 2. Limpieza y Manejo de Nulos
 
 Durante la limpieza, se identificaron varias columnas con valores nulos:
@@ -81,16 +86,6 @@ df = df_con_hora \
     .withColumn("month", month("tpep_pickup_datetime")) \
     .withColumn("day", dayofmonth("tpep_pickup_datetime"))
 ```
-
-## 📊 Visualización (Lightdash)
-
-La visualización se desarrolló en Lightdash, conectando directamente con las tablas creadas en Databricks. Se construyeron dashboards interactivos con insights como:
-
-- Pasajeros por hora y mes, año a año (2020–2024).
-- Ingresos totales por franjas horarias.
-- Distancia media y tarifa media según la hora del día.
-
-Estas visualizaciones permiten detectar patrones de demanda y comportamiento del servicio, como las **horas pico**, o las franjas horarias que generan más ingresos.
 
 ## 🧪 Análisis Exploratorio
 
@@ -160,4 +155,31 @@ display(df_ingresos)
 df_ingresos.write.format("delta").mode("overwrite").saveAsTable("workspace.default.df_ingresos")
 ```
 ![Franjas horarias que general más ingresos 2020-2024](https://github.com/user-attachments/assets/834a182a-d72b-4a80-afe5-436b7b9f1755)
+
+### 🔹 Total de pasajeros de los taxis en cada mes, dividido en horas y filtrado por año
+
+```python
+from pyspark.sql.functions import year, month, hour, sum
+
+# Seleccionar año, mes, hora y el número de pasajeros
+df_agregado = df_filtered.select("year", "month", "hour","passenger_count")
+
+# Agrupar por año, mes y hora y sumar el número de pasajeros
+df_passengers_by_time = df_agregado.groupBy("year", "month", "hour") \
+    .agg(sum("passenger_count").alias("total_passengers")) \
+    .orderBy("year", "month", "total_passengers", ascending=False)
+
+display(df_passengers_by_time)
+
+# Guardar como tabla Delta para usar en el dashboard
+df_passengers_by_time.write.format("delta").mode("overwrite").saveAsTable("workspace.default.df_passengers_by_time")
+````
+
+![Pasajeros por horas y meses en 2020](https://github.com/user-attachments/assets/c427ff3a-8219-4b27-a8a2-d8cfa60fddb9)
+![Pasajeros por horas y meses en 2021 (1)](https://github.com/user-attachments/assets/e4ee1681-3fed-4a77-b47c-66a5bce6aece)
+![Pasajeros por horas y meses en 2022 (1)](https://github.com/user-attachments/assets/0df0bb5e-c5c0-46c7-8fc8-b2c8bab4c9bd)
+![Pasajeros por horas y meses en 2023 (1)](https://github.com/user-attachments/assets/8ac17dff-3b4f-438b-9f3c-1c623de9c719)
+![Pasajeros por horas y meses en 2024 (1)](https://github.com/user-attachments/assets/717c7922-5479-4fcf-9095-e430d7113162)
+
+
 
