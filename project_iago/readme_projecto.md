@@ -119,6 +119,16 @@ Para hacer el proceso más robusto y operativo, se han creado **dos triggers** d
 - **Uso:** Permite refrescar los datasets limpios y las agregaciones para alimentar dashboards o reportes periódicos.
 
 ---
+## ⚠️ Nota sobre Pipelines
+
+En este proyecto **no se han implementado pipelines formales**, ya que:
+
+- **Es una fase exploratoria**: el objetivo principal ha sido analizar y entender los datos, no crear una solución operativa a largo plazo.
+- **El volumen de datos es moderado**: aún siendo Big Data, el alcance actual no requiere una arquitectura compleja ni orquestación avanzada.
+- **Se priorizó la simplicidad**: el uso de notebooks y triggers permite un desarrollo rápido y comprensible sin necesidad de múltiples herramientas intermedias.
+- **No se requiere escalabilidad inmediata**: si el proyecto crece o se industrializa, entonces sí sería recomendable migrar a un sistema de pipelines.
+---
+
 ## 📌 Resultados Generados
 
 | DataFrame              | Descripción                                     |
