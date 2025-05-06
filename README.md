@@ -42,8 +42,6 @@ Aprender los conceptos fundamentales de PySpark:
 ---
 
 ## 📘 Autor
-
-- [Katya Martínez](https://github.com/kat-2103)  👤
-
+- [Zayra Fernández](https://github.com/YukibeSkip)
 ---
 
