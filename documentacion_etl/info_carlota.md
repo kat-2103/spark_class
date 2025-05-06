@@ -84,5 +84,7 @@ El análisis busca responder a preguntas clave sobre la operación de taxis en l
 - ¿Cuáles son las franjas más rentables?
 - ¿Cómo evolucionan los patrones de uso a lo largo de los años?
 
+![image](https://github.com/user-attachments/assets/3355c4bc-b035-4696-93ec-b6169700a1b6)
+
 ---
 
