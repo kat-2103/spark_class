@@ -12,9 +12,8 @@ Este proyecto contiene:
 
 ## 🔍 Contenido
 
-- [`extraccion.ipynb`](./pyspark_rdd_exercise.md): Cuaderno a traves del que extraemos los datos y los combinamos en un csv.
-- [`parquet_file/`](./pyspark_dataframe_exercise.md): Archivos .parquet resultantes del web scrapping.
-- [`combined_data.csv`](./pyspark_rdd_vs_dataframe.md): CSV resultante del procesado de todos los archivos.
+- [`extraccion.ipynb`](./extraccion.ipynb): Cuaderno a traves del que extraemos los datos y los combinamos en un csv.
+- [`NYC_Taxi_ETL.ipynb`](./NYC_Taxi_ETL.ipynb): Cuaderno donde cargamos y procesamos todos los datos realizando la ETL, este cuaderno se uso desde el servicio cloud de Databricks.
 
 ---
 
@@ -28,18 +27,24 @@ Este proyecto contiene:
 - Pandas
 - Pyarrow
 - Fastparquet
+- Acceso a la plataforma cloud de Databicks
 
-Instalación de PySpark en local:
+Instalación de librerias en local:
 
 ```bash
 pip install pyspark
+pip install requests
+pip install bs4
+pip install pandas
+pip install pyarrow
+pip install fastparquet
 ```
 
 ---
 
 ## Objetivo
 
-Analizar y procesar datos sobre la lineas de taxi de Nueva York y sacar unos resultados y conclusiones a esos datos:
+Analizar y procesar datos sobre la lineas de taxi de Nueva York y sacar unos resultados y conclusiones a esos datos
 
 ---
 
