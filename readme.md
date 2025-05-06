@@ -1,10 +1,18 @@
-# Documentación del Procesamiento de Datos de Taxis en Databricks
+# 🚕 PySpark - Procesamiento de Datos de Taxis en Databricks
 
 ## Introducción
 
 Este documento describe el proceso de ingesta, limpieza, transformación, almacenamiento y análisis de datos de taxis de la ciudad de Nueva York en Databricks utilizando Auto Loader y Delta Lake. El objetivo del proyecto fue crear un flujo ETL eficiente que garantice la calidad de los datos y permita su análisis en tiempo real mediante visualizaciones interactivas.
 
-## 1. Ingesta de Datos con Auto Loader
+Este proyecto incluye:
+
+🧩 Ingesta eficiente con Auto Loader
+🧼 Limpieza robusta y validación de datos
+🔄 Transformaciones clave para el análisis
+💾 Almacenamiento optimizado en Delta Lake
+📊 Visualizaciones para dashboards interactivos
+
+## 📥 1. Ingesta de Datos con Auto Loader
 
 Se utilizó Auto Loader de Databricks para detectar y cargar archivos CSV de forma incremental desde un volumen de almacenamiento:
 
@@ -44,7 +52,7 @@ raw_df = spark.readStream.format("cloudFiles") \
     .load(ruta)
 ```
 
-## 2. Limpieza de Datos
+## 🧹 2. Limpieza de Datos
 
 Se limpiaron los datos eliminando valores nulos, duplicados y registros inválidos:
 
@@ -67,7 +75,7 @@ clean_df = clean_df.filter(
 )
 ```
 
-## 3. Transformación de Datos
+## 🔄 3. Transformación de Datos
 
 Se añadieron columnas para análisis posterior:
 
@@ -84,7 +92,7 @@ transformed_df = transformed_df.withColumn(
 )
 ```
 
-## 4. Almacenamiento en Delta Lake
+## 💾 4. Almacenamiento en Delta Lake
 
 Los datos procesados fueron almacenados como tabla Delta administrada dentro del metastore de Databricks:
 
@@ -93,11 +101,11 @@ Los datos procesados fueron almacenados como tabla Delta administrada dentro del
 transformed_df.write.format("delta").mode("overwrite").saveAsTable("taxi_data_bronze")
 ```
 
-## 5. Análisis Interactivo y Visualizaciones
+## 📈 5. Visualizaciones Interactivas
 
 Se realizaron varias visualizaciones clave en el notebook para generar un dashboard empresarial interactivo.
 
-### 5.1 Promedio de Tarifa por Hora del Día
+### 🚖 5.1 Promedio de Tarifa por Hora
 
 ```python
 from pyspark.sql.functions import avg
@@ -107,7 +115,7 @@ df_avg_fare = transformed_df.groupBy("pickup_hour").agg(
 ).orderBy("pickup_hour")
 ```
 
-### 5.2 Total de Pasajeros por Hora
+### 👥 5.2 Total de Pasajeros por Hora
 
 ```python
 from pyspark.sql.functions import sum
@@ -117,7 +125,7 @@ df_total_passengers = transformed_df.groupBy("pickup_hour").agg(
 ).orderBy("pickup_hour")
 ```
 
-### 5.3 Distancia Media Recorrida por Hora
+### 📏 5.3 Distancia Media por Hora
 
 ```python
 df_avg_distance = transformed_df.groupBy("pickup_hour").agg(
@@ -127,6 +135,15 @@ df_avg_distance = transformed_df.groupBy("pickup_hour").agg(
 
 Estas métricas fueron graficadas directamente en el notebook usando visualizaciones nativas de Databricks.
 
-## 6. Conclusión
+## ✅ Conclusión
 
-Este flujo de trabajo ETL utilizando Auto Loader, transformaciones en PySpark y almacenamiento en Delta Lake permite un manejo escalable y confiable de datos de taxis. Las visualizaciones interactivas habilitan el monitoreo en tiempo real y el soporte a la toma de decisiones operativas. El uso de tablas gestionadas mejora la integración con herramientas de BI y facilita el gobierno del dato dentro del ecosistema de Databricks.
+Este flujo ETL con PySpark y Delta Lake ofrece:
+
+✨ Alta eficiencia en la ingesta
+🧪 Datos limpios y listos para análisis
+📊 Visualizaciones en tiempo real
+📚 Fundamento sólido para futuras integraciones de BI
+
+---
+
+📘 Autor: Alexia Caride 👤
