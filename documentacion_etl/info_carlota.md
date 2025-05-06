@@ -96,22 +96,6 @@ Estas visualizaciones permiten detectar patrones de demanda y comportamiento del
 
 Durante el análisis, se realizaron varias agregaciones clave para entender los patrones de comportamiento de los viajes en NYC.
 
-### 🔹 Horas con mayor número de pasajeros
-
-```python
-from pyspark.sql.functions import sum
-
-hour_passengers = df.select("hour", "passenger_count") \
-  .groupBy("hour") \
-  .agg(sum("passenger_count").alias("total_passengers")) \
-  .orderBy("total_passengers", ascending=False)
-
-display(hour_passengers)
-
-# Guardar como tabla Delta para usar en el dashboard
-hour_passengers.write.format("delta").mode("overwrite").saveAsTable("workspace.default.hourly_passengers")
-
-```
 
 ### 🔹 Horas con mayor número de pasajeros
 
@@ -126,6 +110,9 @@ hour_passengers = df.select("hour", "passenger_count") \
   .orderBy("total_passengers", ascending=False)
 
 display(hour_passengers)
+
+# Guardar como tabla Delta para usar en el dashboard
+hour_passengers.write.format("delta").mode("overwrite").saveAsTable("workspace.default.hourly_passengers")
 ```
 ![Horas con mayor número de pasajeros 2020-2024](https://github.com/user-attachments/assets/31c0f2dd-ff1a-485f-a153-4b6d9b5bf6e0)
 
@@ -146,6 +133,9 @@ df_largos_caros = df.select("hour", "trip_distance", "fare_amount") \
   .orderBy("avg_distance", ascending=False)
 
 display(df_largos_caros)
+
+# Guardar como tabla Delta para usar en el dashboard
+df_largos_caros.write.format("delta").mode("overwrite").saveAsTable("workspace.default.df_largos_caros")
 ```
 ![Tarifa media de cada hora](https://github.com/user-attachments/assets/0f99a173-a9eb-459a-b655-2ea5cc241e05)
 ![Distancia media por hora](https://github.com/user-attachments/assets/4ee82f73-edbf-4fd5-bb8b-1191d21b58fa)
@@ -165,6 +155,9 @@ df_ingresos = df.select("hour", "fare_amount") \
   .orderBy("total_revenue", ascending=False)
 
 display(df_ingresos)
+
+# Guardar como tabla Delta para usar en el dashboard
+df_ingresos.write.format("delta").mode("overwrite").saveAsTable("workspace.default.df_ingresos")
 ```
 ![Franjas horarias que general más ingresos 2020-2024](https://github.com/user-attachments/assets/834a182a-d72b-4a80-afe5-436b7b9f1755)
 
