@@ -1,4 +1,4 @@
-# :star: Documentación Proyecto: Ingesta y procesamiento de Datos de Taxis
+# :star: Documentación Ingesta y procesamiento de Datos de Taxis
 
 ## Introducción al proyecto
 
@@ -145,3 +145,12 @@ def procesar_e_ingerir_datos(ruta_origen, tabla_destino):
 
 # :bar_chart: 6. Dashboard con los resultados
 
+![passenger graph](graph1.png)
+
+![tarif graph](graph2.png)
+
+![distance graph](graph3.png)
+
+# :end: Conclusiones finales
+
+Este proyecto me a permitido manejar un volumen considerable de datos de manera rápida y analizarlos para sacar insights interesantes. El almacenamiento con Delta Lake hizo el consultar las tablas para generar el dashboard más sencillo.
