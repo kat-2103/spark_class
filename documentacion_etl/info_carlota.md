@@ -40,6 +40,12 @@ Las decisiones fueron:
 
 Además, al realizar un `display()` para visualizar el número de pasajeros por **año, mes y hora**, detecté que existían registros fuera del rango de años 2020–2024. Para asegurar la coherencia temporal del análisis, **eliminé todos los registros correspondientes a años fuera de este intervalo.**
 
+```python
+df = df.filter(col("passenger_count") > 0)
+columnas_a_eliminar = ["airport_fee", "congestion_surcharge", "RatecodeID", "store_and_fwd_flag"] 
+df = df.drop(*columnas_a_eliminar)
+````
+
 ### 3. Conversión de Timestamps
 
 Se transformaron las columnas de tiempo:
@@ -48,6 +54,12 @@ Se transformaron las columnas de tiempo:
 - `tpep_dropoff_datetime`
 
 Estas se convirtieron a tipo `datetime` para permitir operaciones de agregación temporal.
+```python
+from pyspark.sql.functions import to_timestamp
+
+df = df.withColumn("tpep_pickup_datetime", to_timestamp(df["tpep_pickup_datetime"], "yyyy-MM-dd HH:mm:ss"))
+df = df.withColumn("tpep_dropoff_datetime", to_timestamp(df["tpep_dropoff_datetime"], "yyyy-MM-dd HH:mm:ss"))
+```
 
 ### 4. Particionamiento de Datos
 
@@ -57,6 +69,18 @@ Para optimizar el rendimiento de las consultas, los datos se particionaron por:
 - `year`, `month`, `day`: para permitir filtrado rápido por periodos de tiempo.
 
 Esta decisión mejora significativamente los tiempos de respuesta en entornos distribuidos como Spark o cuando se consulta desde herramientas como Lightdash.
+```python
+from pyspark.sql.functions import hour
+
+df_con_hora = df.withColumn("hour", hour("tpep_pickup_datetime"))
+
+from pyspark.sql.functions import year, month, dayofmonth
+
+df = df_con_hora \
+    .withColumn("year", year("tpep_pickup_datetime")) \
+    .withColumn("month", month("tpep_pickup_datetime")) \
+    .withColumn("day", dayofmonth("tpep_pickup_datetime"))
+```
 
 ## 📊 Visualización (Lightdash)
 
@@ -67,13 +91,6 @@ La visualización se desarrolló en Lightdash, conectando directamente con las t
 - Distancia media y tarifa media según la hora del día.
 
 Estas visualizaciones permiten detectar patrones de demanda y comportamiento del servicio, como las **horas pico**, o las franjas horarias que generan más ingresos.
-
-## 🧰 Tecnologías Utilizadas
-
-- **Apache Spark** para procesamiento de datos.
-- **Databricks** como entorno de ejecución.
-- **Python (PySpark)** para el desarrollo del ETL.
-- **Lightdash** para la visualización de datos.
 
 ## 🧪 Análisis Exploratorio
 
