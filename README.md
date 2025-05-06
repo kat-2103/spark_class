@@ -43,7 +43,8 @@ Aprender los conceptos fundamentales de PySpark:
 
 ## 📘 Autor
 
-- [Katya Martínez](https://github.com/kat-2103)  👤
+
+- [Raul Escudero Perez](https://github.com)
 
 ---
 
