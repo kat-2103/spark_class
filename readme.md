@@ -135,15 +135,6 @@ df_avg_distance = transformed_df.groupBy("pickup_hour").agg(
 
 Estas métricas fueron graficadas directamente en el notebook usando visualizaciones nativas de Databricks.
 
-## ✅ Conclusión
-
-Este flujo ETL con PySpark y Delta Lake ofrece:
-
-✨ Alta eficiencia en la ingesta
-🧪 Datos limpios y listos para análisis
-📊 Visualizaciones en tiempo real
-📚 Fundamento sólido para futuras integraciones de BI
-
 ---
 
 📘 Autor: Alexia Caride 👤
