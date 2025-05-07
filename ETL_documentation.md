@@ -6,7 +6,7 @@ Este documento describe el proceso de carga, limpieza, transformación y almacen
 
 ## ⬆️ 0. Subida de archivos csv locales a un volumen
 
-Una vez extraídos los datos a través del notebook [`extraccion.ipynb`](./extraccion.ipynb) subimos los 10 CSV al apartado de data ingestion de la web de Databricks.
+Una vez extraídos los datos a través del notebook [`extraccion.ipynb`](./extraccion.ipynb) subimos los 10 CSV a un volumen dentro del apartado de data ingestion de la web de Databricks.
 
 ## 🪫 1. Carga de Datos
 
@@ -15,11 +15,13 @@ Primero, cargué los datos desde el volumen de Databricks que contenía los arch
 ```python
 from pyspark.sql import SparkSession
 
+# Crea una sesión de Spark o reutiliza una existente.
 spark = SparkSession.builder.getOrCreate()
 
 # Ruta donde están los archivos chunk_01.csv, chunk_02.csv, ...
 input_path = "/Volumes/workspace/default/data-taxi/chunk_*.csv"
 
+# Lee los archivos CSV como un solo DataFrame
 df = spark.read.option("header", True).option("inferSchema", True).csv(input_path)
 ```
 
@@ -32,9 +34,9 @@ Después de cargar los datos, visualicé los datos para analizar cómo estaban e
 Visualizaciones básicas:
 
 ```python
-display(df)
-df.count()
-df.printSchema()
+display(df) # Muestra el contenido del DataFrame de forma tabular en un entorno interactivo como Databricks o Jupyter.
+df.count() # Devuelve el número total de filas (registros) en el DataFrame.
+df.printSchema() # Muestra la estructura del DataFrame, incluyendo los nombres de las columnas, sus tipos de datos y si pueden ser nulas.
 ```
 
 Visualización de Nulos:
@@ -42,10 +44,16 @@ Visualización de Nulos:
 ```python
 from pyspark.sql.functions import col, sum as _sum, when
 
+# Calcula la cantidad de valores nulos por columna en el DataFrame.
+# Para cada columna `c`, se aplica una condición que evalúa si el valor es nulo.
+# Si es nulo, cuenta 1; de lo contrario, cuenta 0. Luego, se suman los resultados por columna.
+# El resultado es un DataFrame con una sola fila donde cada columna indica cuántos valores nulos tiene esa columna original.
 null_counts = df.select([
     _sum(when(col(c).isNull(), 1).otherwise(0)).alias(c)
     for c in df.columns
 ])
+
+# Muestra el DataFrame resultante que contiene el conteo de nulos por cada columna del DataFrame original.
 display(null_counts)
 ```
 
@@ -83,18 +91,15 @@ plt.show()
 Después de cargar los datos, realicé varias transformaciones para limpiarlos:
 
 ```python
-df_clean = (
-    df.withColumn("pickup_datetime", to_timestamp(col("tpep_pickup_datetime")))
-    .withColumn("dropoff_datetime", to_timestamp(col("tpep_dropoff_datetime")))
-    .filter(col("pickup_datetime").isNotNull())
-    .filter(col("dropoff_datetime").isNotNull())
+df = (
+    df.filter(col("tpep_pickup_datetime").isNotNull())
+    .filter(col("tpep_dropoff_datetime").isNotNull())
     .filter(col("passenger_count") > 0)
     .filter(col("trip_distance") > 0)
     .filter(col("fare_amount") >= 0)
-    .withColumn("pickup_hour", hour(col("pickup_datetime")))
 )
 
-# Eliminar columna 'ratecodeid' y 'vendorid' ya que son identificadores y no aportan información interesante
+# Eliminar columna 'ratecodeid', 'vendorid' y 'airport_fee' ya que son identificadores y no aportan información interesante
 df = df.drop('ratecodeid')
 df = df.drop('vendorid')
 df = df.drop('airport_fee')
@@ -102,10 +107,8 @@ df = df.drop('airport_fee')
 
 Las operaciones de limpieza incluyeron:
 
-- Conversión de fechas a formato timestamp
 - Eliminación de registros con fechas nulas
 - Filtrado de registros con valores inválidos (pasajeros <= 0, distancia <= 0, tarifa < 0)
-- Extracción de la hora de recogida para análisis temporal
 - Eliminación de columnas innecesarias
 
 ## 🔎 4. Tratamiento de Outliers y Valores Nulos
@@ -146,16 +149,25 @@ Eliminé todos los registros con valores nulos ya que con tanta cantidad de dato
 
 ## ➕ 5. Creación de Agregados
 
-*(Es necesario haber creado previamente la columna 'pickup_hour')*
+*(Es necesario haber creado previamente la columna 'pickup_hour' que almacena las horas del dia en tipo string)*
 
 ```python
 from pyspark.sql.functions import col, to_timestamp, hour
 
-# Limpieza básica
-df_limpio = df.withColumn("pickup_datetime", to_timestamp(col("tpep_pickup_datetime"))).withColumn("dropoff_datetime", to_timestamp(col("tpep_dropoff_datetime"))).filter(col("pickup_datetime").isNotNull()).filter(col("passenger_count") > 0)
+# Limpieza básica del DataFrame:
+# 1. Convierte las columnas de fecha y hora de recogida y entrega de tipo string a tipo timestamp.
+# 2. Elimina las filas donde la columna de recogida es nula.
+# 3. Filtra solo los registros con al menos un pasajero.
+df_limpio = (
+    df.withColumn("pickup_datetime", to_timestamp(col("tpep_pickup_datetime")))
+      .withColumn("dropoff_datetime", to_timestamp(col("tpep_dropoff_datetime")))
+      .filter(col("pickup_datetime").isNotNull())
+      .filter(col("passenger_count") > 0)
+)
 
-# Nueva columna con la hora de recogida
+# Agrega una nueva columna `pickup_hour` que extrae la hora (en formato 0–23) del timestamp de recogida.
 df_limpio = df_limpio.withColumn("pickup_hour", hour("pickup_datetime"))
+
 ```
 
 Para facilitar los análisis comunes, creé un DataFrame agregado por hora:
@@ -182,38 +194,7 @@ Delta Lake me proporciona varias ventajas:
 - Optimizaciones de rendimiento
 - Aplicación de esquema
 
-## 👌 7. Preparación para Ingesta Incremental
-
-Finalmente, preparé funciones para la ingesta incremental de nuevos datos:
-
-```python
-def procesar_e_ingerir_datos(ruta_origen, tabla_destino):
-    # Leer nuevos datos
-    nuevos_datos = spark.read.option("header", True).schema(schema).csv(ruta_origen)
-  
-    # Aplicar las mismas transformaciones
-    nuevos_datos_procesados = (
-        nuevos_datos.withColumn("pickup_datetime", to_timestamp(col("tpep_pickup_datetime")))
-        .withColumn("dropoff_datetime", to_timestamp(col("tpep_dropoff_datetime")))
-        .filter(col("pickup_datetime").isNotNull())
-        .filter(col("passenger_count") > 0)
-        .filter(col("trip_distance") > 0)
-        .filter(col("fare_amount") >= 0)
-        .withColumn("pickup_hour", hour("pickup_datetime"))
-    )
-  
-    # Guardar en formato Delta (modo append)
-    nuevos_datos_procesados.write \
-        .format("delta") \
-        .mode("append") \
-        .saveAsTable(tabla_destino)
-  
-    return nuevos_datos_procesados.count()
-```
-
-También implementé funciones para verificar la calidad de los datos y compactar el historial de logs, proporcionando un pipeline completo para mantenimiento continuo de datos.
-
-## 🚀 8. Visualizaciones
+## 🚀 7. Visualizaciones
 
 Finalmente realicé algunas visualizaciones una vez procesado todos los datos, estas visualizaciones son las que luego se mostraran en el dashboard.
 
@@ -229,13 +210,20 @@ Finalmente realicé algunas visualizaciones una vez procesado todos los datos, e
 
 ![Outliers](./images/3.png)
 
-## Conclusiones
+## ⚠️ Mejoras por implementar
 
-Gracias a este proceso, pude manejar de forma eficiente un gran conjunto de datos de taxis y almacenarlos en un formato optimizado para análisis. La integración con Delta Lake aporta múltiples beneficios cuando se trabaja a gran escala, tales como:
+Dado a la falta de tiempo quedó por implementar varias funciones que mejorarian la automatización de este proyecto, las cuales se podrian aplicar en un futuro, estas son:
 
-- Gestión de versiones de los datos
-- Mejoras en el rendimiento de consultas
-- Mantenimiento automatizado
-- Enforzamiento del esquema de datos
+* Ingesta de Múltiples Archivos y Pipeline Incremental
+* Automatización con Triggers
+
+## 🫵 Conclusiones
+
+Gracias a este proceso, pude manejar de forma eficiente un gran conjunto de datos de taxis y almacenarlos en un formato optimizado para análisis. La integración con Delta Lake aporta múltiples beneficios cuando se trabaja a gran escala, los puntos aprendidos en este proyecto fueron:
+
+- Procesamiento eficiente de grandes volúmenes de datos
+- Limpieza y preparación de datos exitosa
+- Almacenamiento optimizado con Delta Lake
+- Visualizacion de los datos
 
 Con estos pasos completados, los datos están preparados para análisis más profundos, creación de visualizaciones y potencial uso en modelos de machine learning.
