@@ -4,7 +4,7 @@ Este documento describe el proceso de limpieza de datos aplicado al dataset de t
 
 ## 1. Preparación del Entorno
 
-Se instalaron las dependencias necesarias para el procesamiento, aunque en este caso solo se requería `beautifulsoup4` (posiblemente para un paso posterior no incluido).
+Se instalaron las dependencias necesarias para el procesamiento
 
 ```python
 %pip install beautifulsoup4
@@ -20,13 +20,30 @@ display(dbutils.fs.ls('dbfs:/Volumes/workspace/default/nyc_taxis/'))
 
 ## 3. Carga del Dataset
 
-Se cargó el archivo CSV utilizando `spark.read.option(...).csv(...)`, aplicando opciones para inferencia de esquema y uso de cabeceras.
+Se cargó el archivo CSV utilizando `spark.read.option(...).csv(...)`
 
-```python
-df = spark.read \
-    .option("inferSchema", "true") \
-    .option("header", "true") \
-    .csv("dbfs:/Volumes/workspace/default/nyc_taxis/green_tripdata_2020-10.csv")
+```files = dbutils.fs.ls("dbfs:/Volumes/workspace/default/nyc_taxis/")
+from pyspark.sql import SparkSession
+#iniciamos sesion
+spark = SparkSession.builder.getOrCreate()
+
+#busca archivos csv
+df_list = []
+
+for file in files:
+    if file.path.endswith(".csv"):  
+        df = spark.read.option("header", "true").csv(file.path)  
+        df_list.append(df)
+
+if df_list:
+    df_taxis = df_list[0]
+    for df in df_list[1:]:
+        df_taxis = df_taxis.union(df)
+
+    display(df_taxis)
+else:
+    print("No se encontraron archivos CSV en el directorio.")
+
 ```
 
 ## 4. Revisión del Esquema y Datos Nulos
