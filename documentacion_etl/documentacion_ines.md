@@ -32,6 +32,8 @@ Las transformaciones generan **tres tablas en formato Delta**, con los siguiente
 | `pickup_year`   | Año de recogida del viaje  |  
 | `pickup_month`  | Mes de recogida del viaje  |  
 | `pickup_hour`   | Hora de recogida del viaje  |  
+| `avg_fare`  | Tarifa promedio  |  
+
 | `avg_distance`  | Distancia promedio de viajes  |  
 | `total_passengers` | Número total de pasajeros  |  
 
