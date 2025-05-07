@@ -84,9 +84,21 @@ viajes_por_hora.write.format('delta').mode('overwrite').saveAsTable('workspace.d
 En Databricks, se crearon dashboards interactivos con visualizaciones clave:
 
 - Promedio de tarifas por hora del día
+- 
+![image](https://github.com/user-attachments/assets/b4d4b4b5-d7d9-4909-a98a-32482b978ef2)
+
 - Total de pasajeros por hora
+
+  ![image](https://github.com/user-attachments/assets/e4ea880c-4304-43c4-ba82-eabb968f615b)
+
 - Distancia media recorrida por hora
+
+![image](https://github.com/user-attachments/assets/8b899b4c-9ac7-4c23-868c-c068dd89fce2)
+
 - Ingresos totales por franja horaria
+
+![image](https://github.com/user-attachments/assets/5b41b680-7fad-4627-a316-be6575ff2b82)
+
 
 ### ⏱ Automatización (Opcional)
 
@@ -123,10 +135,10 @@ Ambas tareas están configuradas con triggers para ejecutarse de manera periódi
 
 ## 🧠 Insights Clave
 
-- Las horas pico suelen tener mayor número de viajes y mayores ingresos.
-- La franja nocturna genera más ingresos totales debido a tarifas nocturnas o viajes más largos.
-- En horas de madrugada hay menos viajes pero mayor tiempo promedio de trayecto.
-
+- Las horas nocturnas son las horas en las que hay mas promedio de tarifa.
+- La franja de tarde genera más ingresos totales debido a que hay una mayor cantidad de viajes.
+- Por la tarde es cuando mas cantidad de pasajeros hay concretamente a las 18:00.
+- Cuando mas distancia promedio hay es en la madrugada.
 ---
 
 ## 👥 Autores
