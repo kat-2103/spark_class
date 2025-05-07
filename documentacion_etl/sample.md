@@ -169,7 +169,16 @@ El proceso de limpieza se ejecutan las siguientes fases:
  
 ---
  
-6. 📈 Visualizaciones de Dashboards
+  6. 📈 Visualizaciones de Dashboards
+
+     Se visualizan los siguientes dashboards:
+      1. Total viajes por hora.
+      2. Total ganancias por mes.
+      3. Media de distancias por hora.
+      4. Pasajeros por hora.
+      5. Total pasajeros por hora.
+
+     Además, se generan dashboards de comparación entre tipos de taxis.
 
 
  
