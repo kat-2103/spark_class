@@ -46,26 +46,53 @@ else:
 
 ```
 
-## 4. Revisión del Esquema y Datos Nulos
+## 4. Eliminación de registros invalidos
 
-Se examinó el esquema y se identificaron columnas con valores nulos mediante:
+```df_clean=df_taxis.filter(df['passenger_count'] > 0) ```
 
-```python
-df.printSchema()
-df.select([F.count(F.when(F.col(c).isNull(), c)).alias(c) for c in df.columns]).show()
-```
-
-## 5. Renombrado de Columnas
+## 5. Modificación de fechas para el análisis
 
 Se renombraron columnas para estandarizar el formato a `snake_case` y facilitar la manipulación posterior:
 
-```python
-df_clean = df.withColumnRenamed("VendorID", "vendor_id") \
-             .withColumnRenamed("lpepPickupDatetime", "pickup_datetime") \
-             .withColumnRenamed("lpepDropoffDatetime", "dropoff_datetime")
+```from pyspark.sql.functions import to_date, to_timestamp, col, hour, day, dayofweek, year, month, when
+
+df_clean=df_taxis.withColumn('tpep_pickup_datetime',to_timestamp(col("tpep_pickup_datetime"))) 
+df_clean=df_clean.withColumn('tpep_dropoff_datetime',to_timestamp(col("tpep_dropoff_datetime")))
+df_clean = df_clean.withColumn("pickup_hour", hour("tpep_pickup_datetime"))
+df_clean = df_clean.withColumn("pickup_day", dayofweek(col("tpep_pickup_datetime")))
+df_clean = df_clean.withColumn("pickup_year", year(col("tpep_pickup_datetime")))
+df_clean = df_clean.withColumn("pickup_month", month(col("tpep_pickup_datetime")))
+
+df_clean = df_clean.withColumn("pickup_day",
+    when(col("pickup_day") == 2, "Lunes")
+    .when(col("pickup_day") == 3, "Martes")
+    .when(col("pickup_day") == 4, "Miércoles")
+    .when(col("pickup_day") == 5, "Jueves")
+    .when(col("pickup_day") == 6, "Viernes")
+    .when(col("pickup_day") == 7, "Sábado")
+    .when(col("pickup_day") == 1, "Domingo")
+)
+
+from pyspark.sql.functions import col, month, when
+
+df_clean = df_clean.withColumn("pickup_month",
+    when(col("pickup_month") == 1, "Ene")
+    .when(col("pickup_month") == 2, "Feb")
+    .when(col("pickup_month") == 3, "Mar")
+    .when(col("pickup_month") == 4, "Abr")
+    .when(col("pickup_month") == 5, "May")
+    .when(col("pickup_month") == 6, "Jun")
+    .when(col("pickup_month") == 7, "Jul")
+    .when(col("pickup_month") == 8, "Ago")
+    .when(col("pickup_month") == 9, "Sep")
+    .when(col("pickup_month") == 10, "Oct")
+    .when(col("pickup_month") == 11, "Nov")
+    .when(col("pickup_month") == 12, "Dic")
+)
+
 ```
 
-## 6. Eliminación de Registros Inválidos
+## 6. Aplicación de mediana en valores 0
 
 Se aplicaron filtros para limpiar los registros con datos incorrectos o no plausibles:
 
@@ -73,35 +100,71 @@ Se aplicaron filtros para limpiar los registros con datos incorrectos o no plaus
 - Coordenadas geográficas fuera de los rangos esperados.
 - Valores negativos o nulos en campos de cantidad o precio.
 
-Ejemplo:
+```from pyspark.sql.types import DoubleType
+from pyspark.sql.functions import col, when
 
-```python
-df_clean = df_clean.filter(
-    (F.col("pickup_datetime") < F.col("dropoff_datetime")) &
-    (F.col("trip_distance") > 0) &
-    (F.col("fare_amount") > 0)
+# Convertir la columna "trip_distance" a tipo Double
+df_clean = df_clean.withColumn("trip_distance", col("trip_distance").cast(DoubleType()))
+
+# Calcular la mediana de la distancia del viaje
+mediana_trip_distancia = df_clean.approxQuantile("trip_distance", [0.5], 0.01)[0]
+
+# Reemplazar valores 0 en "trip_distance" con la mediana calculada
+df_clean = df_clean.withColumn(
+    "trip_distance", when(col("trip_distance") == 0, mediana_trip_distancia).otherwise(col("trip_distance"))
 )
+
+# Verificar cambios
+df_clean.select("trip_distance").show(5)
 ```
 
-## 7. Conversión de Tipos
+## 7. Análisis Agregado de Viajes en Taxi por Fecha y Hora
 
-Se aseguraron los tipos adecuados para columnas de fecha y numéricas:
+Codido que agrupa y calcula estadísticas relevantes sobre tarifas, distancias y pasajeros en función del tiempo:
 
-```python
-df_clean = df_clean.withColumn("pickup_datetime", F.to_timestamp("pickup_datetime")) \
-                   .withColumn("dropoff_datetime", F.to_timestamp("dropoff_datetime"))
+```agg_df = df_clean.groupBy("pickup_year", "pickup_month", "pickup_day", "pickup_hour").agg(
+    {
+        "fare_amount": "avg",  # Calcular el promedio del costo del viaje
+        "trip_distance": "avg",  # Calcular la distancia promedio del viaje
+        "passenger_count": "sum",  # Calcular el total de pasajeros
+        "tip_amount": "avg",  # Calcular el promedio de propinas
+        "congestion_surcharge": "avg"  # Calcular el promedio del recargo por congestión
+    }
+)
+
+# Renombrar columnas para mayor legibilidad
+agg_df = agg_df.withColumnRenamed("avg(fare_amount)", "avg_fare") \
+               .withColumnRenamed("avg(trip_distance)", "avg_distance") \
+               .withColumnRenamed("sum(passenger_count)", "total_passengers") \
+               .withColumnRenamed("avg(tip_amount)", "avg_tips") \
+               .withColumnRenamed("avg(congestion_surcharge)", "avg_congestion_surcharge")
+
+# Mostrar las primeras 10 filas de la tabla agregada
+agg_df.show(10)
+
+# Guardar la tabla en formato sobrescritura dentro de la base de datos "default" con el nombre "taxisss"
+agg_df.write.mode("overwrite").saveAsTable("default.taxisss")
+
 ```
 
-## 8. Resultados Finales
-
-Se verificó la cantidad de registros tras la limpieza:
-
-```python
-print(f"Registros limpios: {df_clean.count()}")
+# Visualización de los datos:
+## 1. Total de pasajeros por hora:
+```
+df_total_passengers = df_clean.groupBy("pickup_hour").agg(
+    sum("passenger_count").alias("total_passengers")  
+).orderBy("pickup_hour")
 ```
 
----
+## 2. Promedio de tarifa por día:
+```
+df_avg_fare = df_clean.groupBy("pickup_hour").agg(
+    avg("fare_amount").alias("avg_fare")  
+).orderBy("pickup_hour")
+```
 
-## Conclusión
-
-La limpieza de datos en este pipeline incluyó validación de integridad, estandarización de nombres de columnas, tratamiento de valores nulos y eliminación de registros erróneos. Este conjunto de datos limpio puede usarse para análisis exploratorio, visualización o entrenamiento de modelos de machine learning.
+## 3. Distancia media recorrida por hora:
+```
+df_avg_distance = df_clean.groupBy("pickup_hour").agg(
+    avg("trip_distance").alias("avg_distance")  a
+).orderBy("pickup_hour")
+```
