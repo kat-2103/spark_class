@@ -17,7 +17,7 @@ archivos = dbutils.fs.ls(ruta_volumen)
 archivos_csv = [archivo.path for archivo in archivos if archivo.path.endswith(".csv")]
 
 # Cargar todos los archivos CSV en un DataFrame
-df = spark.read.option("header", True).option("inferSchema", True).csv(ruta_volumen)
+df_taxis = spark.read.option("header", True).option("inferSchema", True).csv(ruta_volumen)
 ```
 
 ## 2. Limpieza de Datos
