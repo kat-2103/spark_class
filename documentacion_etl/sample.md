@@ -46,7 +46,7 @@ def standardize_yellow_schema(df):
 
 # Limpieza de datos
 
-Tras visualizar los datos he comprobado que están bien formateados así que no hay necesidad evaluar valores erróneos. Sin embargos hay columnas que tienen todos los valores nulos. La función get_null_summary me muestra un porcentaje de valores nulos y efectivamente compruebo que hay dataframes con valores nulos.
+Tras visualizar los datos he comprobado que están bien formateados así que como primera aproximación nos centraremos en lo más evidente, los valores nulos. La función get_null_summary me muestra un porcentaje de valores nulos y efectivamente compruebo que hay dataframes con valores nulos.
 
 ```
 +---------------------+----------+----------+--------+
