@@ -80,9 +80,9 @@ df = df.withColumn("high_tip_flag", when(col("tip_amount") > (col("total_amount"
 ## 6. Agregaciones y Almacenamiento
 Se agregan los datos por hora, día y mes para análisis estadísticos y se almacenan en Delta Lake.  
 ```python
-agg_hour_df.write.format("delta").mode("overwrite").saveAsTable("nyc_taxi_agg_hourly")
-agg_day_df.write.format("delta").mode("overwrite").option("mergeSchema", "true").saveAsTable("nyc_taxi_agg_daily")
-agg_month_df.write.format("delta").mode("overwrite").saveAsTable("nyc_taxi_agg_monthly")
+agg_hour_df.write.format("delta").mode("append").saveAsTable("nyc_taxi_agg_hourly")
+agg_day_df.write.format("delta").mode("append").option("mergeSchema", "true").saveAsTable("nyc_taxi_agg_daily")
+agg_month_df.write.format("delta").mode("append").saveAsTable("nyc_taxi_agg_monthly")
 ``` 
 
 
