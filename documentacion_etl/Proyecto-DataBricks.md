@@ -10,7 +10,7 @@ Primero, cargué los datos desde el volumen de Databricks que contenía los arch
 
 ```python
 # Definir la ruta del volumen específico donde están los archivos
-ruta_volumen = "/Volumes/workspace/default/data_taxi"
+ruta_volumen = "/Volumes/workspace/default/data-taxis"
 
 # Listar y filtrar los archivos CSV
 archivos = dbutils.fs.ls(ruta_volumen)
