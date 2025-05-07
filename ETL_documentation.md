@@ -119,17 +119,19 @@ Para controlar los Outliers no pude evaluarlos adecuadamente debido al gran volu
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col
 
+# Columna sobre la que se eliminarán outliers
 columna = "trip_distance"
-# Calcular Q1 y Q3
-quantiles = df.approxQuantile(columna , [0.25, 0.75], 0.01)
-q1, q3 = quantiles[0], quantiles[1]
-iqr = q3 - q1
 
-# Definir límites inferior y superior
+# Calcular el primer (Q1) y tercer (Q3) cuartil
+quantiles = df.approxQuantile(columna, [0.25, 0.75], 0.01)
+q1, q3 = quantiles[0], quantiles[1]
+iqr = q3 - q1  # Rango intercuartílico
+
+# Límites para detección de outliers
 lower_bound = q1 - 1.5 * iqr
 upper_bound = q3 + 1.5 * iqr
 
-# Filtrar los outliers
+# Filtrar filas que están dentro del rango aceptable
 df_sin_outliers = df.filter((col(columna) >= lower_bound) & (col(columna) <= upper_bound))
 ```
 
