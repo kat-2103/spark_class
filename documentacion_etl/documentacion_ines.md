@@ -11,7 +11,7 @@ Los datos se cargan desde múltiples archivos **CSV** almacenados en un volumen 
 ## 2️⃣ Transformaciones  
 
 Se aplican las siguientes transformaciones para garantizar la calidad y utilidad de los datos:  
-
+- **Borrado de duplicados**.  
 - **Eliminación de viajes sin pasajeros**.  
 - **Imputación de distancia igual a 0** mediante la mediana.  
 - **Transformación de fechas** a tipo `Timestamp`.  
