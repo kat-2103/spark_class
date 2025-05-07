@@ -17,10 +17,30 @@ Este repositorio contiene un notebook de Databricks que realiza una **limpieza, 
 - Se infiere automáticamente el esquema y se lee el encabezado.
 
 ### 2. 🧹 Limpieza de Datos
-- Se eliminan columnas irrelevantes o poco útiles como: `airport_fee`, `RatecodeID`, `congestion_surcharge`, etc.
+- - Se eliminan las siguientes columnas por las razones indicadas:
+  
+| Columna | Razón de eliminación |
+|--------|----------------------|
+| `airport_fee` | Contenía un alto porcentaje de valores nulos y no aportaba valor al análisis general ni a los insights buscados. |
+| `RatecodeID` | No era relevante para los objetivos del proyecto ni para las visualizaciones del dashboard final. |
+| `store_and_fwd_flag` | Campo técnico poco utilizado y sin impacto directo en las métricas clave. |
+| `vendorId` | Identificador del proveedor del servicio; no se usó en ninguna agregación ni visualización. |
+| `PULocationID`, `DOLocationID` | IDs de ubicaciones geográficas que no se usaron en este análisis (no se realizaron análisis espaciales). |
+| `mta_tax`, `tolls_amount`, `congestion_surcharge` | Impuestos y recargos que no eran relevantes para los KPIs principales del dashboard. |
+
 - Se identifican y manejan valores nulos reemplazándolos por la media de cada columna numérica:
   - Columnas afectadas: `passenger_count`, `trip_distance`, `fare_amount`, `total_amount`, `tip_amount`.
 - Se convierten tipos de datos a formatos adecuados (ej. `DoubleType`, `IntegerType`).
+
+#### ✅ Justificación del uso de la media para imputar nulos:
+
+Se ha optado por utilizar la **media como estrategia para imputar valores faltantes** en las columnas numéricas seleccionadas, basándose en los siguientes criterios:
+
+- **Objetivo exploratorio del proyecto**: como se trata de un análisis descriptivo e informativo (no predictivo), pequeños ajustes o aproximaciones no afectan significativamente las conclusiones generales.
+- **Facilidad de implementación y escalabilidad**: calcular la media es una operación sencilla y eficiente en entornos de Big Data como Spark, ideal para este caso donde no se requiere alta precisión estadística.
+- **Distribuciones razonablemente simétricas**: se asume que las variables como `trip_distance` o `fare_amount` tienen distribuciones que no presentan sesgos extremos en este subconjunto de datos, lo cual hace que la media sea un estimador aceptable.
+- **No hay evidencia de patrones complejos en los datos faltantes**: se asume que los valores nulos son aleatorios y no están correlacionados con otras variables ocultas, lo que justifica un enfoque simple.
+
 
 ## ⚠️ Nota sobre Outliers
 
