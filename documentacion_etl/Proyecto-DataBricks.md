@@ -61,7 +61,8 @@ Finalmente, los datos procesados se almacenaron en formato Delta Lake, lo que pe
 
 ```python
 # Guardar el DataFrame transformado en formato Delta
-df_transformed.write.format("delta").mode("overwrite").save("/mnt/datalake/taxis_delta")
+# Guardar el DataFrame transformado en formato Delta
+df_taxis_limpio.write.format("delta").mode("overwrite").saveAsTable("df_limpio_delta")
 ```
 
 ## 5. Análisis Visual Interactivo
