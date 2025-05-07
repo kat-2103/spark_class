@@ -45,7 +45,7 @@ Se agregaron columnas adicionales para facilitar el análisis posterior, como la
 ```python
 from pyspark.sql.functions import hour, unix_timestamp
 
-# Convertir columnas de fecha/hora si es necesario
+# Extraer la hora de recogida
 df_transformed = df_clean.withColumn("pickup_hour", hour(col("tpep_pickup_datetime")))
 
 # Calcular duración del viaje en minutos
@@ -60,7 +60,6 @@ df_transformed = df_transformed.withColumn(
 Finalmente, los datos procesados se almacenaron en formato Delta Lake, lo que permite un manejo eficiente y consultas optimizadas:
 
 ```python
-# Guardar el DataFrame transformado en formato Delta
 # Guardar el DataFrame transformado en formato Delta
 df_taxis_limpio.write.format("delta").mode("overwrite").saveAsTable("df_limpio_delta")
 ```
