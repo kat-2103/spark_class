@@ -43,16 +43,6 @@ Este proyecto realiza un **pipeline ETL completo** desde la ingesta de datos has
   - Hora de recogida y destino (`hora_int_pickup`, `hora_int_dropoff`)
   - Extraer la hora de las fechas de recogida y destino permite analizar patrones horarios, como identificar las horas pico de demanda.
 
-
-### ⚠️ Nota sobre Outliers
-
-En este análisis no se ha realizado una limpieza específica de outliers debido a:
-
-- **Representatividad**: Valores extremos pueden reflejar situaciones reales del servicio de taxis.
-- **Enfoque exploratorio**: El objetivo es obtener una visión general de los patrones de uso, sin necesidad de eliminar datos para modelado predictivo.
-- **Análisis futuro**: El tratamiento de outliers se deja para etapas posteriores si es necesario para modelos estadísticos o de machine learning.
-
-
 ### 3. 📊 Agregación por hora
 
 Se generan tres tablas Delta con las siguientes métricas agrupadas por hora:
