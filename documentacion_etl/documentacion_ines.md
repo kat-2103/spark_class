@@ -19,7 +19,7 @@ Se aplican las siguientes transformaciones para garantizar la calidad y utilidad
 '**: `pickup_year`, `pickup_month`, `pickup_day`, `pickup_hour`.  
 - **Filtrado de años inválidos** en `pickup_year`, eliminando registros fuera del rango 2020-2024 (aproximadamente 1000 registros).  
 - **Transformación de día y mes numéricos** a palabra en español.  
-- **congestion_surcharge, fare_amount y tips_amount negativos** pasados a positivo.  
+- ** fare_amount y tips_amount negativos** pasados a positivo.  
 - **Enriquecimiento con datos de ubicación**: Se incorpora información de distrito y zona (`PU_Borough`, `PU_Zone`, `DO_Borough`, `DO_Zone`) mediante un `JOIN` con un dataset de ubicaciones (`PULocationID`, `DOLocationID`). Además creación de un campo 'Borough_concat', que une el PU_Borough con el DO_Borough, para tener los desplazamientos entre distritos.  
 
 ## 3️⃣ Resultado Final   
