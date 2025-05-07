@@ -24,20 +24,24 @@ Este proyecto realiza un **pipeline ETL completo** desde la ingesta de datos has
 
 ### 1. 💾 Ingesta de Datos
 
-- Se descargan archivos `.csv` mensuales de los viajes en taxi.
-- Se convierten de `.csv` a `.parquet` (formato optimizado).
+- Se descargan archivos .parquet mensuales de los viajes en taxi desde 2020 hasta 2024.
+- Se convierten de `.parquet` a `.csv` .
 - Se almacenan en una ruta local dentro del workspace de Databricks.
 
 ### 2. 🔄 Transformación
 
 - Limpieza de valores nulos:
   - Imputación de medias en columnas numéricas: `fare_amount`, `trip_distance`, etc.
+  -  Los valores nulos en columnas numéricas pueden distorsionar los análisis y modelos predictivos. Imputar (rellenar)     estos valores con la media de la columna ayuda a mantener la integridad de los datos sin introducir sesgos significativos.
 - Conversión de fechas (`tpep_pickup_datetime`, `tpep_dropoff_datetime`) a formato `timestamp`.
+  - Convertir las fechas a formato timestamp permite realizar operaciones de tiempo más precisas y eficientes, como cálculos de duración, filtrado por rangos de fechas y agrupaciones por hora, día, mes, etc.
 - Eliminación de columnas irrelevantes: `airport_fee`, `RatecodeID`, `store_and_fwd_flag`, etc.
+  -  Algunas columnas pueden no ser relevantes para el análisis o pueden contener datos redundantes. Eliminar estas columnas reduce el tamaño del DataFrame y mejora la eficiencia del procesamiento.
 - Filtrado de registros inválidos: `passenger_count = 0`, `fare_amount <= 0`.
+  - Los registros con valores inválidos pueden sesgar los resultados del análisis. Filtrar estos registros asegura que solo se analicen datos válidos y significativos.
 - Generación de nuevas columnas:
   - Hora de recogida y destino (`hora_int_pickup`, `hora_int_dropoff`)
-  - Duración del viaje en minutos (`trip_duration_minutes`)
+  - Extraer la hora de las fechas de recogida y destino permite analizar patrones horarios, como identificar las horas pico de demanda.
 
 ### 3. 📊 Agregación por hora
 
@@ -48,6 +52,7 @@ Se generan tres tablas Delta con las siguientes métricas agrupadas por hora:
 | `viajes_por_hora` | Distancia promedio, duración promedio, tarifa base y total promedio |
 | `pasajeros_df` | Total de pasajeros, cantidad de viajes, promedio de pasajeros por viaje |
 | `ingresos_por_hora` | Ingresos totales, cantidad de viajes, ingreso promedio por viaje |
+| `ingresos_por_franja` | Franja horaria, ingresos totales, cantidad de viajes, ingreso promedio por viaje |
 
 Además, se categorizan las horas en franjas horarias:
 - Mañana (6-11)
@@ -75,7 +80,17 @@ En Databricks, se crearon dashboards interactivos con visualizaciones clave:
 
 ### ⏱ Automatización (Opcional)
 
-El proceso puede ser automatizado usando Jobs en Databricks para ejecutar periódicamente el pipeline y actualizar los datos sin intervención manual.
+El proceso puede ser automatizado usando Jobs en Databricks para ejecutar periódicamente el pipeline y actualizar los datos sin intervención manual. Se crearon dos tareas distintas:
+
+#### Tarea de Ingesta de Datos
+
+- Esta tarea ejecuta el notebook de ingesta de datos, descargando y almacenando los archivos `.parquet` mensuales de los viajes en taxi.
+
+#### Tarea de Transformación ETL
+
+- Esta tarea ejecuta el notebook de transformación ETL, aplicando las limpiezas, transformaciones y agregaciones necesarias a los datos.
+
+Ambas tareas están configuradas con triggers para ejecutarse de manera periódica, asegurando que los datos se mantengan actualizados sin necesidad de intervención manual.
 
 ---
 
